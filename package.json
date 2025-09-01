@@ -1,0 +1,47 @@
+{
+    "name": "async-iterable",
+    "version": "1.0.0",
+    "description": "Controlled async iterable – push values in, and receive feedback with for-of.",
+    "keywords": [
+        "async",
+        "async-generator",
+        "async-iterable",
+        "async-iteration",
+        "async-iterator",
+        "generator",
+        "duplex",
+        "pushable",
+        "controlled",
+        "stream",
+        "streaming",
+        "iterable",
+        "iteration",
+        "iterator"
+    ],
+    "type": "module",
+    "main": "./dist/async-iterable.js",
+    "types": "./dist/async-iterable.d.ts",
+    "module": "./async-iterable.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/vadzim/async-iterable-controller.git"
+    },
+    "author": "developer@vadzim.info",
+    "license": "ISC",
+    "engines": {
+        "node": ">=16"
+    },
+    "scripts": {
+        "clean": "rm -rf dist",
+        "build": "npm x sucrase -- . --out-dir ./dist --exclude-dirs node_modules,dist,index.test.ts --disable-es-transforms --transforms typescript",
+        "types": "npm x --package=typescript tsc",
+        "prepublishOnly": "npm run clean && npm run check && npm run build",
+        "format": "npm x prettier -- --write .",
+        "lint": "npm x prettier -- --check .",
+        "test": "node --test",
+        "check": "npm run lint && npm run types && npm run test"
+    },
+    "devDependencies": {
+        "@types/node": "^24.3.0"
+    }
+}
