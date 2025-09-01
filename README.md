@@ -1,4 +1,4 @@
-# async-iterable
+# async-iterables
 
 <!--
 [![Coverage Workflow](https://github.com/vadzim/async-iterable-controller/actions/workflows/coverage.yml/badge.svg?branch=main)](https://github.com/vadzim/async-iterable-controller/actions/workflows/coverage.yml)

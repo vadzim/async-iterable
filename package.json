@@ -19,12 +19,12 @@
         "iterator"
     ],
     "type": "module",
-    "main": "./dist/async-iterable.js",
-    "types": "./dist/async-iterable.d.ts",
-    "module": "./async-iterable.ts",
+    "main": "./dist/async-iterables.js",
+    "types": "./dist/async-iterables.d.ts",
+    "module": "./async-iterables.ts",
     "repository": {
         "type": "git",
-        "url": "https://github.com/vadzim/async-iterable-controller.git"
+        "url": "https://github.com/vadzim/async-iterable.git"
     },
     "author": "developer@vadzim.info",
     "license": "ISC",
