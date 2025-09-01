@@ -1,4 +1,6 @@
 # async-iterable
+[![Coverage Workflow](https://github.com/vadzim/async-iterable-controller/actions/workflows/coverage.yml/badge.svg?branch=main)](https://github.com/vadzim/async-iterable-controller/actions/workflows/coverage.yml)
+[![codecov](https://codecov.io/gh/vadzim/async-iterable-controller/branch/main/graph/badge.svg)](https://codecov.io/gh/vadzim/async-iterable-controller)
 
 Controlled async iterable.
 

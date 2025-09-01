@@ -33,13 +33,14 @@
     },
     "scripts": {
         "clean": "rm -rf dist",
-        "build": "npm x sucrase -- . --out-dir ./dist --exclude-dirs node_modules,dist,index.test.ts --disable-es-transforms --transforms typescript",
-        "types": "npm x --package=typescript tsc",
+        "build": "npm -y x sucrase -- . --out-dir ./dist --exclude-dirs node_modules,dist,index.test.ts --disable-es-transforms --transforms typescript",
+        "types": "npm -y x --package=typescript tsc",
         "prepublishOnly": "npm run clean && npm run check && npm run build",
-        "format": "npm x prettier -- --write .",
-        "lint": "npm x prettier -- --check .",
+        "format": "npm -y x prettier -- --write .",
+        "lint": "npm -y x prettier -- --check .",
         "test": "node --test",
-        "check": "npm run lint && npm run types && npm run test"
+        "check": "npm run lint && npm run types && npm run test",
+        "coverage": "npm -y x c8 -r text -r lcov node --test"
     },
     "devDependencies": {
         "@types/node": "^24.3.0"
