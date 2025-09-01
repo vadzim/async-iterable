@@ -1,6 +1,6 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { createAsyncIterable } from "./async-iterable.ts"
+import { createAsyncIterable } from "./async-iterables.ts"
 
 test("push should return after the value is yielded", async () => {
 	const buffer: unknown[] = []
