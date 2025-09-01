@@ -36,7 +36,7 @@
         "build": "npm -y x sucrase -- . --out-dir ./dist --exclude-dirs node_modules,dist,index.test.ts --disable-es-transforms --transforms typescript",
         "types": "npm -y x --package=typescript tsc",
         "prepublishOnly": "npm run clean && npm run check && npm run build",
-        "format": "npm -y x prettier -- --write .",
+        "lint:fix": "npm -y x prettier -- --write .",
         "lint": "npm -y x prettier -- --check .",
         "test": "node --test",
         "check": "npm run lint && npm run types && npm run test",
