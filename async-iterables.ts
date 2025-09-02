@@ -1,8 +1,9 @@
-type IteratorController<T, R, N> = {
+export type IteratorController<T, R = void, N = void> = {
 	yield(value: T | Promise<T>): Promise<IteratorResult<N, undefined>>
 	yieldIterable(iterable: Iterable<T> | AsyncIterable<T>): Promise<IteratorResult<N, undefined>>
 	throw(error: unknown): Promise<IteratorResult<N, undefined>>
 	return(value: R | Promise<R>): Promise<IteratorResult<N, undefined>>
+	sent(): Promise<IteratorResult<N, undefined>>
 }
 
 export async function* createAsyncIterable<T = unknown, R = void, N = void>(
@@ -55,13 +56,15 @@ class AsyncIteratorController<T, R = void, N = void> {
 
 	#buffer: Slot<T, R, N>[]
 	#status: { done: boolean }
+	#sent: Promise<IteratorResult<N, undefined>> = Promise.resolve({ done: false, value: undefined as any })
+
+	sent(): Promise<IteratorResult<N, undefined>> {
+		return this.#sent
+	}
 
 	yield(value: T | Promise<T>): Promise<IteratorResult<N, undefined>> {
 		if (!this.#status.done) {
-			const ret = setLastData(
-				this.#buffer,
-				Promise.resolve(value).then(value => ({ done: false, value })),
-			)
+			const ret = this.#setLastData(Promise.resolve(value).then(value => ({ done: false, value })))
 			this.#buffer.push(createNextSlot<T, R, N>())
 			return ret
 		}
@@ -86,7 +89,7 @@ class AsyncIteratorController<T, R = void, N = void> {
 	throw(error: unknown) {
 		if (!this.#status.done) {
 			this.#status.done = true
-			return setLastData(this.#buffer, Promise.reject(error))
+			return this.#setLastData(Promise.reject(error))
 		}
 		return Promise.resolve({ done: true, value: undefined as any })
 	}
@@ -94,12 +97,16 @@ class AsyncIteratorController<T, R = void, N = void> {
 	return(value: R | Promise<R>) {
 		if (!this.#status.done) {
 			this.#status.done = true
-			return setLastData(
-				this.#buffer,
-				Promise.resolve(value).then(value => ({ done: true, value })),
-			)
+			return this.#setLastData(Promise.resolve(value).then(value => ({ done: true, value })))
 		}
 		return Promise.resolve({ done: true, value: undefined as any })
+	}
+
+	#setLastData(data: Promise<IteratorResult<Awaited<T>, Awaited<R>>>) {
+		const slot = this.#buffer[this.#buffer.length - 1] ?? never()
+		slot.data.resolve(data)
+		this.#sent = slot.result.promise
+		return slot.result.promise
 	}
 }
 
@@ -111,15 +118,6 @@ function createNextSlot<T, R, N>(): Slot<T, R, N> {
 	result.promise.catch(noop)
 
 	return { data, result }
-}
-
-function setLastData<T, R, N>(
-	buffer: Slot<T, R, N>[],
-	data: Promise<IteratorResult<Awaited<T>, Awaited<R>>>,
-) {
-	const slot = buffer[buffer.length - 1] ?? never()
-	slot.data.resolve(data)
-	return slot.result.promise
 }
 
 function noop() {}
