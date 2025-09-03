@@ -64,26 +64,29 @@ class AsyncIteratorController<T, R = void, N = void> {
 
 	yield(value: T | Promise<T>): Promise<IteratorResult<N, undefined>> {
 		if (!this.#status.done) {
-			const ret = this.#setLastData(Promise.resolve(value).then(value => ({ done: false, value })))
+			const ret = this.#setLastData(createIteratorResult(false, value))
 			this.#buffer.push(createNextSlot<T, R, N>())
 			return ret
 		}
-		return Promise.resolve({ done: true, value: undefined as any })
+		return this.#returnDone()
 	}
 
 	async yieldIterable(iterable: Iterable<T> | AsyncIterable<T>) {
-		for await (const value of iterable) {
-			if (this.#status.done) {
-				return { done: true, value: undefined as any }
+		try {
+			if (!this.#status.done) {
+				for await (const value of iterable) {
+					const ret = await this.yield(value)
+					if (ret.done) {
+						return ret
+					}
+				}
+				return { done: false, value: undefined as any }
 			}
-
-			const ret = await this.yield(value)
-			if (ret.done) {
-				return ret
-			}
+			return this.#returnDone()
+		} catch (e) {
+			await this.throw(e)
+			throw e
 		}
-
-		return { done: false, value: undefined as any }
 	}
 
 	throw(error: unknown) {
@@ -91,15 +94,15 @@ class AsyncIteratorController<T, R = void, N = void> {
 			this.#status.done = true
 			return this.#setLastData(Promise.reject(error))
 		}
-		return Promise.resolve({ done: true, value: undefined as any })
+		return this.#returnDone()
 	}
 
 	return(value: R | Promise<R>) {
 		if (!this.#status.done) {
 			this.#status.done = true
-			return this.#setLastData(Promise.resolve(value).then(value => ({ done: true, value })))
+			return this.#setLastData(createIteratorResult(true, value))
 		}
-		return Promise.resolve({ done: true, value: undefined as any })
+		return this.#returnDone()
 	}
 
 	#setLastData(data: Promise<IteratorResult<Awaited<T>, Awaited<R>>>) {
@@ -107,6 +110,13 @@ class AsyncIteratorController<T, R = void, N = void> {
 		slot.data.resolve(data)
 		this.#sent = slot.result.promise
 		return slot.result.promise
+	}
+
+	async #returnDone(): Promise<IteratorResult<N, undefined>> {
+		try {
+			await this.#sent
+		} catch {}
+		return { done: true, value: undefined }
 	}
 }
 
@@ -124,6 +134,10 @@ function noop() {}
 
 function never(error = new Error("assertion failed: the never function should never be called")): never {
 	throw error
+}
+
+async function createIteratorResult<D extends boolean, T>(done: D, value: T) {
+	return { done, value: await value }
 }
 
 type Slot<T, R, N> = {
